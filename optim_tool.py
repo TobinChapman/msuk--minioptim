@@ -45,13 +45,14 @@ def main():
     else:
         st.write("Please fill in all inputs and select at least one campaign.")
 
-    # create a pie chart
-    plt.figure(figsize=(3, 3))
-    plt.pie(final_df['budget'], labels=final_df['campaign'], autopct='%1.1f%%')
-    plt.title('Budget Split')
+    if weeks_in is not None and budget_in is not None and option:
+        plt.figure(figsize=(3, 3))
+        plt.pie(final_df['budget'], labels=final_df['campaign'], autopct='%1.1f%%')
+        plt.title('Budget Split')
 
-    # display the chart in Streamlit
-    st.pyplot(plt)
+        st.pyplot(plt)
+    else:
+        st.write("Your pie chart here.")
 
 if __name__ == '__main__':
     main()
