@@ -34,8 +34,8 @@ def main():
     st.title("Optimise Budget Across Campaigns")
     st.write("Input budget and number of weeks the media is running. Then select your campaigns:")
 
-    weeks_in = st.number_input("# of weeks", value=10, step=1, placeholder="Type a number...")
-    budget_in = st.number_input("Total budget", value=10000000, step=1, placeholder="Type a number...")
+    weeks_in = st.number_input("Number of weeks", value=10, step=1, placeholder="Type a number...")
+    budget_in = st.number_input("Total budget", value=10000000, step=10000, placeholder="Type a number...")
     option = st.multiselect('Select your campaigns:', base_curves.columns.tolist()) 
 
     if weeks_in is not None and budget_in is not None and option:
