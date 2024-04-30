@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-base_curves = pd.DataFrame(pd.read_csv('kfc_sublayers.csv'))
+base_curves = pd.DataFrame(pd.read_csv('all_kfc_curves.csv'))
 
 base_curves = base_curves.drop('netspend',axis=1)
 
@@ -45,14 +45,17 @@ def main():
     else:
         st.write("Please fill in all inputs and select at least one campaign.")
 
+    
     if weeks_in is not None and budget_in is not None and option:
         plt.figure(figsize=(3, 3))
         plt.pie(final_df['budget'], labels=final_df['campaign'], autopct='%1.1f%%')
         plt.title('Budget Split')
 
         st.pyplot(plt)
-    else:
-        st.write("Your pie chart here.")
+
+    if weeks_in is not None and budget_in is not None and option:
+       st.line_chart(filtered_df)
+    
 
 if __name__ == '__main__':
     main()
