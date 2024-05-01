@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 base_curves = pd.DataFrame(pd.read_csv('all_kfc_curves.csv'))
 
@@ -47,15 +48,30 @@ def main():
 
     
     if weeks_in is not None and budget_in is not None and option:
-        plt.figure(figsize=(3, 3))
+        plt.figure(figsize=(8, 8))
         plt.pie(final_df['budget'], labels=final_df['campaign'], autopct='%1.1f%%')
         plt.title('Budget Split')
+        
 
         st.pyplot(plt)
 
     if weeks_in is not None and budget_in is not None and option:
-       st.line_chart(filtered_df)
-    
+        fig = go.Figure()
+
+        for col in filtered_df.columns:
+            fig.add_trace(go.Scatter(x=filtered_df.index, y=filtered_df[col], mode='lines', name=col))
+
+        fig.update_layout(
+            autosize=False,
+            width=800,
+            height=500,
+            xaxis_title="X-axis label",
+            yaxis_title="Y-axis label",
+        )
+
+        st.plotly_chart(fig)
+
+        #st.pyplot(fig)
 
 if __name__ == '__main__':
     main()
