@@ -32,6 +32,7 @@ def optimise_curve(df, budget, weeks):
     return budget_df
 
 def main():
+    st.set_page_config(page_title="KFC Optimiser", page_icon=":dart:", initial_sidebar_state="expanded")
     st.title("Optimise Budget Across Campaigns")
     st.write("Input budget and number of weeks the media is running. Then select your campaigns:")
 
@@ -65,8 +66,8 @@ def main():
             autosize=False,
             width=800,
             height=500,
-            xaxis_title="X-axis label",
-            yaxis_title="Y-axis label",
+            xaxis_title="Netspend (£k)",
+            yaxis_title="Revenue Generated (£)",
         )
 
         st.plotly_chart(fig)
