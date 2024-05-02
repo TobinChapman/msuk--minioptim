@@ -57,10 +57,11 @@ def main():
         st.pyplot(plt)
 
     if weeks_in is not None and budget_in is not None and option:
-        fig = go.Figure()
 
-        for col in filtered_df.columns:
-            fig.add_trace(go.Scatter(x=filtered_df.index, y=filtered_df[col], mode='lines', name=col))
+        fig = go.Figure()
+        chart_df = filtered_df.iloc[:400, :]
+        for col in chart_df.columns:
+            fig.add_trace(go.Scatter(x=chart_df.index, y=chart_df[col], mode='lines', name=col))
 
         fig.update_layout(
             autosize=False,

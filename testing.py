@@ -1,18 +1,34 @@
 import streamlit as st
 import pandas as pd
 
-# Assuming you have a DataFrame 'df'
-df = pd.read_csv('all_kfc_curves.csv')
+base_curves = pd.DataFrame(pd.read_csv('all_kfc_curves.csv'))
 
-# Create a multiselect widget for the y-axis
-y_options = [col for col in df.columns if df[col].dtype in ['int64', 'float64']]
-selected_y_columns = st.multiselect('Select columns to plot', y_options)
+base_curves = base_curves.drop('netspend',axis=1)
 
-if selected_y_columns:
-    # Create a new DataFrame with the selected columns
-    plot_df = df[selected_y_columns]
+def optimise_curve(df, budget, weeks):
+    # create a new df to hold the results
+    df_mid = pd.DataFrame()
 
-    # Plot the line chart
-    st.line_chart(plot_df)
-else:
-    st.write("Please select at least one column to plot.")
+    #calculate the number of 'units' that we have to assign
+    units = budget/weeks/1000
+    
+    for col in df.columns:
+        df_mid[col + '_incr'] = df[col].diff().fillna(0)
+    
+    df_mid = df_mid.filter(regex='_incr').melt(var_name = 'campaign').nlargest(round(units), 'value')
+
+    budget_df = pd.DataFrame(df_mid['campaign'].value_counts()).reset_index()
+
+    budget_df['campaign'] = budget_df['campaign'].str.replace('_incr', '')
+
+    budget_df['budget'] = (budget_df['count']/(budget_df['count'].sum()))*budget
+
+    budget_df = budget_df.drop('count',axis=1)
+
+    budget_df['budget'] = budget_df['budget'].round()
+    
+    return budget_df
+
+filtered_df = base_curves.iloc[:, :5]
+
+final_df = optimise_curve(filtered_df, weeks = 10, budget = 10000000)
