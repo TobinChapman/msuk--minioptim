@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 
 base_curves = pd.DataFrame(pd.read_csv('all_kfc_curves.csv'))
 
-base_curves = base_curves.drop('netspend',axis=1)
+curves_only = base_curves.drop('netspend',axis=1)
 
 def optimise_curve(df, budget, weeks):
     # create a new df to hold the results
@@ -17,17 +17,29 @@ def optimise_curve(df, budget, weeks):
     for col in df.columns:
         df_mid[col + '_incr'] = df[col].diff().fillna(0)
     
-    df_mid = df_mid.filter(regex='_incr').melt(var_name = 'campaign').nlargest(round(units), 'value')
+    df_mid = df_mid.filter(regex='_incr').melt(var_name = 'Campaign').nlargest(round(units), 'value')
 
-    budget_df = pd.DataFrame(df_mid['campaign'].value_counts()).reset_index()
+    budget_df = pd.DataFrame(df_mid['Campaign'].value_counts()).reset_index()
 
-    budget_df['campaign'] = budget_df['campaign'].str.replace('_incr', '')
+    budget_df['Campaign'] = budget_df['Campaign'].str.replace('_incr', '')
 
-    budget_df['budget'] = (budget_df['count']/(budget_df['count'].sum()))*budget
+    budget_df['Budget'] = (budget_df['count']/(budget_df['count'].sum()))*budget
 
     budget_df = budget_df.drop('count',axis=1)
 
-    budget_df['budget'] = budget_df['budget'].round()
+    budget_df['Budget'] = budget_df['Budget'].round()
+
+    budget_df['wklybudget'] = (budget_df['Budget']/weeks).round(-3)
+
+    base_curves.set_index('netspend', inplace=True)
+
+    budget_df['Predicted_Transactions'] = (budget_df.apply(lambda row: base_curves.loc[row['wklybudget'], row['Campaign']], axis=1)).round()
+
+    budget_df = (
+        budget_df.assign(
+            Predicted_Revenue=(budget_df['Predicted_Transactions']*13.13).round(),
+            Predicted_ROI=lambda df: (df['Predicted_Revenue']/df['wklybudget']).round(1)
+        )).drop('wklybudget', axis=1)
     
     return budget_df
 
@@ -35,23 +47,23 @@ def main():
     st.set_page_config(page_title="KFC Optimiser", page_icon=":dart:", initial_sidebar_state="expanded")
     st.image('kfc_logo.PNG', width=150)
     st.title("Optimise Budget Across Campaigns")
-    st.write("Input budget and number of weeks the media is running. Then select your campaigns:")
+    st.write("Input budget and number of weeks the media is running. Then select your Campaigns:")
 
     weeks_in = st.number_input("Number of weeks", value=10, step=1, placeholder="Type a number...")
     budget_in = st.number_input("Total budget", value=10000000, step=10000, placeholder="Type a number...")
-    option = st.multiselect('Select your campaigns:', base_curves.columns.tolist()) 
+    option = st.multiselect('Select your Campaigns:', curves_only.columns.tolist()) 
 
     if weeks_in is not None and budget_in is not None and option:
-        filtered_df = base_curves[option]
+        filtered_df = curves_only[option]
         final_df = optimise_curve(filtered_df, weeks = weeks_in, budget = budget_in)
         st.write(final_df)
     else:
-        st.write("Please fill in all inputs and select at least one campaign.")
+        st.write("Please fill in all inputs and select at least one Campaign.")
 
     
     if weeks_in is not None and budget_in is not None and option:
         plt.figure(figsize=(8, 8))
-        plt.pie(final_df['budget'], labels=final_df['campaign'], autopct='%1.1f%%')
+        plt.pie(final_df['Budget'], labels=final_df['Campaign'], autopct='%1.1f%%')
         plt.title('Budget Split')
         
 
