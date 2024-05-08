@@ -33,13 +33,17 @@ def optimise_curve(df, budget, weeks):
 
     base_curves.set_index('netspend', inplace=True)
 
-    budget_df['Predicted_Transactions'] = (budget_df.apply(lambda row: base_curves.loc[row['wklybudget'], row['Campaign']], axis=1)).round()
+    budget_df['Predicted_Transactions'] = ((budget_df.apply(lambda row: base_curves.loc[row['wklybudget'], row['Campaign']], axis=1))*weeks).round()
 
-    budget_df = (
-        budget_df.assign(
-            Predicted_Revenue=(budget_df['Predicted_Transactions']*13.13).round(),
-            Predicted_ROI=lambda df: (df['Predicted_Revenue']/df['wklybudget']).round(1)
-        )).drop('wklybudget', axis=1)
+    budget_df['Predicted_Revenue'] = (budget_df['Predicted_Transactions']*13.13).round()
+
+    budget_df.loc['Total'] = budget_df.sum()
+
+    budget_df.at['Total', 'Campaign'] = 'Total'
+
+    budget_df['Predicted_ROI'] = (budget_df['Predicted_Revenue']/budget_df['Budget']).round(1)
+    
+    budget_df = budget_df.drop('wklybudget', axis=1)
     
     return budget_df
 
@@ -62,8 +66,10 @@ def main():
 
     
     if weeks_in is not None and budget_in is not None and option:
+
+        final_df_rmv = final_df.drop('Total', axis=0)
         plt.figure(figsize=(8, 8))
-        plt.pie(final_df['Budget'], labels=final_df['Campaign'], autopct='%1.1f%%')
+        plt.pie(final_df_rmv['Budget'], labels=final_df_rmv['Campaign'], autopct='%1.1f%%')
         plt.title('Budget Split')
         
 
