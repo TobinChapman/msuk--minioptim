@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
-base_curves = pd.DataFrame(pd.read_csv('all_kfc_curves.csv'))
+base_curves = pd.DataFrame(pd.read_csv('all_warbs_curves.csv'))
 
 curves_only = base_curves.drop('netspend',axis=1)
 
@@ -12,12 +12,12 @@ def optimise_curve(df, budget, weeks):
     df_mid = pd.DataFrame()
 
     #calculate the number of 'units' that we have to assign
-    steps = budget/weeks/1000
+    units = budget/weeks/1000
     
     for col in df.columns:
         df_mid[col + '_incr'] = df[col].diff().fillna(0)
     
-    df_mid = df_mid.filter(regex='_incr').melt(var_name = 'Campaign').nlargest(round(steps), 'value')
+    df_mid = df_mid.filter(regex='_incr').melt(var_name = 'Campaign').nlargest(round(units), 'value')
 
     budget_df = pd.DataFrame(df_mid['Campaign'].value_counts()).reset_index()
 
