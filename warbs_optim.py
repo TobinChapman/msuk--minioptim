@@ -48,8 +48,8 @@ def optimise_curve(df, budget, weeks):
     return budget_df
 
 def main():
-    st.set_page_config(page_title="KFC Optimiser", page_icon=":dart:", initial_sidebar_state="expanded")
-    st.image('kfc_logo.PNG', width=150)
+    st.set_page_config(page_title="Warbs Optimiser", page_icon=":dart:", initial_sidebar_state="expanded")
+    #st.image('kfc_logo.PNG', width=150)
     st.title("Optimise Budget Across Campaigns")
     st.write("Input budget and number of weeks the media is running. Then select your Campaigns:")
 
